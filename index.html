@@ -1,78 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Curso Inglés II</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inglés II - Plataforma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <header>
-    <h1>Curso de Inglés II - E-learning</h1>
-    <p>Propósito: Comprender y expresar información básica sobre rutinas, celebraciones, intereses y alimentos.</p>
-    <nav>
-      <ul>
-        <li><a href="#unidad1">Unidad 1</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <!-- Unidad 1 -->
-  <section id="unidad1">
-    <h2>Unidad 1: ¿Qué hacemos en nuestro tiempo libre?</h2>
-
-    <!-- Tema 1 -->
-    <div class="card">
-      <h3>Routine verbs and present simple</h3>
-      <p>Actividad: Identifica actividades habituales y relaciónalas con imágenes. Luego escribe oraciones completas y comparte tu horario en el foro.</p>
-      <video src="videos/unidad1_tema1.mp4" controls></video>
-      <audio src="audios/unidad1_tema1.mp3" controls></audio>
-      <img src="mapas/unidad1_tema1.png" alt="Mapa mental rutina">
-      <aside>¿Sabías qué? El presente simple es el tiempo más usado en inglés cotidiano.</aside>
-    </div>
-
-    <!-- Tema 2 -->
-    <div class="card">
-      <h3>Adverbs of frequency</h3>
-      <p>Actividad: Escucha un audio sobre rutinas y señala la frecuencia con la que se realizan. Usa adverbios como always, often, never.</p>
-      <video src="videos/unidad1_tema2.mp4" controls></video>
-      <audio src="audios/unidad1_tema2.mp3" controls></audio>
-      <img src="mapas/unidad1_tema2.png" alt="Mapa mental frecuencia">
-      <aside>¿Sabías qué? Los adverbios de frecuencia ayudan a describir hábitos y rutinas.</aside>
-    </div>
-
-    <!-- Tema 3 -->
-    <div class="card">
-      <h3>Healthy habits</h3>
-      <p>Actividad: En parejas, pregunta y responde sobre hábitos saludables y reporta oralmente los resultados.</p>
-      <video src="videos/unidad1_tema3.mp4" controls></video>
-      <audio src="audios/unidad1_tema3.mp3" controls></audio>
-      <img src="mapas/unidad1_tema3.png" alt="Mapa mental hábitos saludables">
-      <aside>¿Sabías qué? Dormir bien y hacer ejercicio regularmente son claves para la salud.</aside>
-    </div>
-
-    <!-- Tema 4 -->
-    <div class="card">
-      <h3>Gender roles routines</h3>
-      <p>Actividad: Investiga actividades de jóvenes en diferentes países y reflexiona sobre la desigualdad en los roles de género.</p>
-      <video src="videos/unidad1_tema4.mp4" controls></video>
-      <audio src="audios/unidad1_tema4.mp3" controls></audio>
-      <img src="mapas/unidad1_tema4.png" alt="Mapa mental roles de género">
-      <aside>¿Sabías qué? Los roles de género influyen en las rutinas personales y comunitarias.</aside>
-    </div>
-
-    <!-- Quiz final -->
-    <div class="quiz">
-      <h3>Quiz de Unidad 1</h3>
-      <p>Responde las siguientes preguntas para repasar lo aprendido.</p>
-      <button onclick="startQuiz()">Comenzar Quiz</button>
-      <div id="quiz-container"></div>
-    </div>
-  </section>
-
-  <footer>
-    <p>Créditos: Espacio para foto personal y mensaje final.</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <div id="root"></div>
+    <script type="text/babel" src="App.jsx"></script>
 </body>
 </html>
