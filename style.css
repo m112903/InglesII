@@ -1,13 +1,13 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   margin: 0;
-  background-color: #f9f9f9;
+  background-color: #fdfdfd;
   color: #333;
 }
 
 header {
-  background-color: #004080;
-  color: white;
+  background-color: #a3c4f3; /* azul pastel */
+  color: #333;
   padding: 20px;
   text-align: center;
 }
@@ -23,31 +23,35 @@ nav ul li {
 }
 
 nav ul li a {
-  color: white;
+  color: #333;
   text-decoration: none;
+  font-weight: bold;
 }
 
 section {
   padding: 20px;
-  margin: 20px;
-  background-color: white;
-  border-radius: 8px;
 }
 
-article {
+.card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 aside {
-  background-color: #e0f7fa;
+  background-color: #d2b48c; /* café claro */
   padding: 10px;
-  border-left: 4px solid #008080;
+  border-left: 4px solid #a3c4f3;
   margin-top: 10px;
+  border-radius: 8px;
 }
 
 footer {
-  background-color: #004080;
-  color: white;
+  background-color: #a3c4f3;
+  color: #333;
   text-align: center;
   padding: 10px;
 }
