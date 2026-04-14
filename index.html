@@ -3,278 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inglés II - Plataforma CCH</title>
-    <!-- Cargamos las librerías necesarias desde CDN confiables -->
+    <title>Inglés II - Vanilla</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f8fafc; }
-        #root { height: 100%; }
-        /* Pantalla de carga inicial */
-        #loader {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: sans-serif;
-            color: #4338ca;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-top: 4px solid #4338ca;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .unit-btn.active { background-color: #4338ca; border-right: 4px solid white; }
     </style>
 </head>
 <body>
-    <div id="root">
-        <div id="loader">
-            <div class="spinner"></div>
-            <p>Cargando plataforma de Inglés...</p>
-        </div>
+    <div class="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-80 bg-indigo-900 text-white transition-all duration-300 flex flex-col shadow-xl z-30">
+            <div class="p-6 flex items-center gap-3 border-b border-indigo-800 h-20">
+                <i data-lucide="book-open" class="text-indigo-400 w-6 h-6"></i>
+                <h1 id="sidebar-title" class="font-bold text-xl truncate">INGLÉS II</h1>
+            </div>
+            
+            <nav id="unit-list" class="flex-1 overflow-y-auto py-4 custom-scroll">
+                <!-- Las unidades se cargarán aquí con JS -->
+            </nav>
+
+            <button onclick="toggleSidebar()" class="p-5 bg-indigo-950 hover:bg-indigo-800 flex justify-center transition-colors">
+                <i id="sidebar-toggle-icon" data-lucide="chevron-left"></i>
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white border-b px-8 h-20 shadow-sm flex items-center z-10">
+                <h2 id="header-unit-title" class="font-bold text-indigo-900 text-lg">Cargando unidad...</h2>
+            </header>
+
+            <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-10 custom-scroll">
+                <div class="max-w-4xl mx-auto w-full" id="main-container">
+                    <!-- El contenido dinámico se inyecta aquí -->
+                </div>
+            </div>
+        </main>
     </div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useLayoutEffect } = React;
+    <script>
+        // Datos de la aplicación
+        const units = [
+            {
+                id: 1,
+                title: "Unit 1: What do we do in our free time?",
+                icon: "calendar",
+                topics: [
+                    { 
+                        title: "Routine verbs and present simple", 
+                        content: "Talk about your daily life. Expressions: on Mondays, at 6pm, in the morning.",
+                        interactive: "Activity: Match 'Have breakfast' and 'Study' with their images.",
+                        didYouKnow: "In English-speaking countries, breakfast is often the most important meal!",
+                        audioFile: "audio_u1_t1.mp3",
+                        videoFile: "video_u1_t1.mp4"
+                    },
+                    { 
+                        title: "Adverbs of frequency", 
+                        content: "Always, often, sometimes, never. How often do you study?",
+                        interactive: "Listen to the audio and identify frequency adverbs.",
+                        didYouKnow: "Adverbs of frequency go BEFORE the main verb but AFTER the verb 'to be'.",
+                        audioFile: "audio_u1_t2.mp3",
+                        videoFile: "video_u1_t2.mp4"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Unit 2: What is happening?",
+                icon: "cloud-sun",
+                topics: [
+                    { 
+                        title: "Present continuous", 
+                        content: "Actions happening right now. Subject + am/is/are + verb-ing.",
+                        interactive: "Describe what people are doing in the park picture.",
+                        didYouKnow: "In the UK, talking about the weather is a national hobby!",
+                        audioFile: "audio_u2_t1.mp3",
+                        videoFile: "video_u2_t1.mp4"
+                    }
+                ]
+            }
+        ];
 
-        const App = () => {
-            const [activeUnit, setActiveUnit] = useState(0);
-            const [activeTopic, setActiveTopic] = useState(0);
-            const [showQuiz, setShowQuiz] = useState(false);
-            const [sidebarOpen, setSidebarOpen] = useState(true);
+        // Estado global
+        let activeUnitIndex = 0;
+        let activeTopicIndex = 0;
+        let sidebarOpen = true;
 
-            // Función para refrescar iconos de Lucide
-            const refreshIcons = () => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            };
+        // Elementos del DOM
+        const unitList = document.getElementById('unit-list');
+        const mainContainer = document.getElementById('main-container');
+        const headerTitle = document.getElementById('header-unit-title');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarTitle = document.getElementById('sidebar-title');
+        const toggleIcon = document.getElementById('sidebar-toggle-icon');
 
-            // Usamos useLayoutEffect para que los iconos carguen lo más rápido posible
-            useLayoutEffect(() => {
-                refreshIcons();
-            });
+        // Inicialización
+        function init() {
+            renderSidebar();
+            renderContent();
+            lucide.createIcons();
+        }
 
-            // Re-ejecutar cuando cambie el contenido
-            useEffect(() => {
-                refreshIcons();
-            }, [activeUnit, activeTopic, showQuiz, sidebarOpen]);
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            if (sidebarOpen) {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-80');
+                sidebarTitle.style.display = 'block';
+                toggleIcon.setAttribute('data-lucide', 'chevron-left');
+            } else {
+                sidebar.classList.remove('w-80');
+                sidebar.classList.add('w-20');
+                sidebarTitle.style.display = 'none';
+                toggleIcon.setAttribute('data-lucide', 'menu');
+            }
+            renderSidebar(); // Re-render para actualizar textos
+            lucide.createIcons();
+        }
 
-            const units = [
-                {
-                    id: 1,
-                    title: "Unit 1: What do we do in our free time?",
-                    icon: "calendar",
-                    topics: [
-                        { 
-                            title: "Routine verbs and present simple", 
-                            content: "Talk about your daily life. Expressions: on Mondays, at 6pm, in the morning.",
-                            interactive: "Activity: Match 'Have breakfast' and 'Study' with their images.",
-                            didYouKnow: "In English-speaking countries, breakfast is often the most important meal!",
-                            audioFile: "audio_u1_t1.mp3",
-                            videoFile: "video_u1_t1.mp4"
-                        },
-                        { 
-                            title: "Adverbs of frequency", 
-                            content: "Always, often, sometimes, never. How often do you study?",
-                            interactive: "Listen to the audio and identify frequency adverbs.",
-                            didYouKnow: "Adverbs of frequency go BEFORE the main verb but AFTER the verb 'to be'.",
-                            audioFile: "audio_u1_t2.mp3",
-                            videoFile: "video_u1_t2.mp4"
-                        }
-                    ],
-                    quiz: [
-                        { q: "I ___ (watch) TV on Mondays.", a: ["watch", "watches", "watching"], correct: 0 }
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "Unit 2: What is happening?",
-                    icon: "cloud-sun",
-                    topics: [
-                        { 
-                            title: "Present continuous", 
-                            content: "Actions happening right now. Subject + am/is/are + verb-ing.",
-                            interactive: "Describe what people are doing in the park picture.",
-                            didYouKnow: "In the UK, talking about the weather is a national hobby!",
-                            audioFile: "audio_u2_t1.mp3",
-                            videoFile: "video_u2_t1.mp4"
-                        }
-                    ],
-                    quiz: [
-                        { q: "They ___ (play) football now.", a: ["is playing", "are playing", "play"], correct: 1 }
-                    ]
-                }
-            ];
+        function renderSidebar() {
+            unitList.innerHTML = units.map((unit, index) => `
+                <button onclick="changeUnit(${index})" 
+                        class="unit-btn w-full flex items-center gap-4 px-6 py-4 transition-all ${activeUnitIndex === index ? 'active' : 'hover:bg-indigo-800'}">
+                    <div class="w-6 flex justify-center"><i data-lucide="${unit.icon}"></i></div>
+                    ${sidebarOpen ? `<span class="text-sm font-medium text-left truncate">${unit.title}</span>` : ''}
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
 
-            const currentUnit = units[activeUnit];
-            const currentTopic = currentUnit.topics[activeTopic];
+        function changeUnit(index) {
+            activeUnitIndex = index;
+            activeTopicIndex = 0;
+            renderSidebar();
+            renderContent();
+        }
 
-            const handleNext = () => {
-                if (activeTopic < currentUnit.topics.length - 1) {
-                    setActiveTopic(activeTopic + 1);
-                } else {
-                    setShowQuiz(true);
-                }
-            };
+        function handleNext() {
+            const currentUnit = units[activeUnitIndex];
+            if (activeTopicIndex < currentUnit.topics.length - 1) {
+                activeTopicIndex++;
+                renderContent();
+            } else {
+                renderQuiz();
+            }
+        }
 
-            return (
-                <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
-                    {/* Sidebar */}
-                    <aside className={`${sidebarOpen ? 'w-80' : 'w-20'} bg-indigo-900 text-white transition-all duration-300 flex flex-col shadow-xl z-30`}>
-                        <div className="p-6 flex items-center gap-3 border-b border-indigo-800 h-20">
-                            <i data-lucide="book-open" className="text-indigo-400 w-6 h-6"></i>
-                            {sidebarOpen && <h1 className="font-bold text-xl truncate">INGLÉS II</h1>}
-                        </div>
+        function handlePrev() {
+            if (activeTopicIndex > 0) {
+                activeTopicIndex--;
+                renderContent();
+            }
+        }
+
+        function renderContent() {
+            const unit = units[activeUnitIndex];
+            const topic = unit.topics[activeTopicIndex];
+            headerTitle.innerText = unit.title;
+
+            const progress = ((activeTopicIndex + 1) / unit.topics.length) * 251.2;
+
+            mainContainer.innerHTML = `
+                <div class="space-y-8 pb-10 fade-in">
+                    <section class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                        <h3 class="text-3xl font-black text-slate-800 mb-4">${topic.title}</h3>
+                        <p class="text-slate-600 text-xl leading-relaxed mb-8">${topic.content}</p>
                         
-                        <nav className="flex-1 overflow-y-auto py-4 custom-scroll">
-                            {units.map((unit, index) => (
-                                <button
-                                    key={unit.id}
-                                    onClick={() => {
-                                        setActiveUnit(index);
-                                        setActiveTopic(0);
-                                        setShowQuiz(false);
-                                    }}
-                                    className={`w-full flex items-center gap-4 px-6 py-4 transition-all ${activeUnit === index ? 'bg-indigo-700 border-r-4 border-white' : 'hover:bg-indigo-800'}`}
-                                >
-                                    <div className="w-6 flex justify-center"><i data-lucide={unit.icon}></i></div>
-                                    {sidebarOpen && <span className="text-sm font-medium text-left truncate">{unit.title}</span>}
-                                </button>
-                            ))}
-                        </nav>
+                        <div class="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 shadow-inner">
+                            <div class="flex items-center gap-3 text-indigo-900 font-bold mb-4">
+                                <i data-lucide="headphones" class="w-6 h-6"></i>
+                                <span class="text-lg">Escuchar Lección</span>
+                            </div>
+                            <audio controls class="w-full">
+                                <source src="${topic.audioFile}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                    </section>
 
-                        <button 
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-5 bg-indigo-950 hover:bg-indigo-800 flex justify-center transition-colors"
-                        >
-                            <i data-lucide={sidebarOpen ? "chevron-left" : "menu"}></i>
-                        </button>
-                    </aside>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl aspect-video relative group">
+                            <video controls class="w-full h-full object-cover">
+                                <source src="${topic.videoFile}" type="video/mp4">
+                            </video>
+                            <div class="absolute top-4 left-4 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase">Video Tutorial</div>
+                        </div>
 
-                    {/* Main Content */}
-                    <main className="flex-1 flex flex-col overflow-hidden">
-                        <header className="bg-white border-b px-8 h-20 shadow-sm flex items-center z-10">
-                            <h2 className="font-bold text-indigo-900 text-lg">{currentUnit.title}</h2>
-                        </header>
-
-                        <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scroll">
-                            <div className="max-w-4xl mx-auto w-full">
-                                {!showQuiz ? (
-                                    <div className="space-y-8 pb-10">
-                                        <section className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
-                                            <h3 className="text-3xl font-black text-slate-800 mb-4">{currentTopic.title}</h3>
-                                            <p className="text-slate-600 text-xl leading-relaxed mb-8">{currentTopic.content}</p>
-                                            
-                                            <div className="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 shadow-inner">
-                                                <div className="flex items-center gap-3 text-indigo-900 font-bold mb-4">
-                                                    <i data-lucide="headphones" className="w-6 h-6"></i>
-                                                    <span className="text-lg">Escuchar Lección</span>
-                                                </div>
-                                                <audio controls className="w-full" key={currentTopic.audioFile}>
-                                                    <source src={currentTopic.audioFile} type="audio/mpeg" />
-                                                    Tu navegador no soporta el elemento de audio.
-                                                </audio>
-                                            </div>
-                                        </section>
-
-                                        <div className="grid md:grid-cols-2 gap-8">
-                                            <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl aspect-video relative group">
-                                                <video controls className="w-full h-full object-cover" key={currentTopic.videoFile}>
-                                                    <source src={currentTopic.videoFile} type="video/mp4" />
-                                                </video>
-                                                <div className="absolute top-4 left-4 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase">Video Tutorial</div>
-                                            </div>
-
-                                            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
-                                                <i data-lucide="brain" className="text-purple-500 w-10 h-10 mb-4"></i>
-                                                <h4 className="font-bold text-slate-400 uppercase text-xs tracking-[0.2em] mb-4">Unit Progress</h4>
-                                                <div className="relative">
-                                                    <svg className="w-24 h-24">
-                                                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
-                                                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="251.2" strokeDashoffset={251.2 - (251.2 * (activeTopic + 1) / currentUnit.topics.length)} className="text-indigo-600" />
-                                                    </svg>
-                                                    <span className="absolute inset-0 flex items-center justify-center text-2xl font-black text-indigo-900">
-                                                        {currentUnit.id}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200 flex gap-5 items-start">
-                                            <div className="bg-amber-400 p-3 rounded-xl text-white">
-                                                <i data-lucide="help-circle" className="w-6 h-6"></i>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-amber-900 text-lg mb-1">Did You Know?</h4>
-                                                <p className="text-amber-800 text-lg leading-snug italic">"{currentTopic.didYouKnow}"</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex justify-between items-center pt-10 border-t border-slate-200">
-                                            <button 
-                                                disabled={activeTopic === 0}
-                                                onClick={() => setActiveTopic(activeTopic - 1)}
-                                                className="flex items-center gap-2 text-slate-400 disabled:opacity-0 font-bold hover:text-indigo-600 transition-colors"
-                                            >
-                                                <i data-lucide="chevron-left"></i> Anterior
-                                            </button>
-                                            <button 
-                                                onClick={handleNext}
-                                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all transform hover:-translate-y-1 active:scale-95"
-                                            >
-                                                {activeTopic === currentUnit.topics.length - 1 ? "Comenzar Test" : "Siguiente Tema"} <i data-lucide="chevron-right"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-white rounded-[3rem] shadow-2xl p-12 text-center max-w-lg mx-auto border border-slate-100 animate-in zoom-in-95 duration-300">
-                                        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
-                                            <i data-lucide="award" className="w-12 h-12"></i>
-                                        </div>
-                                        <h3 className="text-3xl font-black text-slate-900 mb-2">¡Unidad Completada!</h3>
-                                        <p className="text-slate-500 text-lg mb-10">Has dominado los temas de la {currentUnit.title}</p>
-                                        
-                                        <div className="bg-slate-50 rounded-3xl p-8 mb-10">
-                                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Tu calificación</p>
-                                            <div className="text-7xl font-black text-indigo-600">100<span className="text-3xl">%</span></div>
-                                        </div>
-
-                                        <button 
-                                            onClick={() => {
-                                                if (activeUnit < units.length - 1) {
-                                                    setActiveUnit(activeUnit + 1);
-                                                    setActiveTopic(0);
-                                                    setShowQuiz(false);
-                                                }
-                                            }}
-                                            className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold hover:bg-black transition-all shadow-lg text-lg"
-                                        >
-                                            Continuar a la siguiente unidad
-                                        </button>
-                                    </div>
-                                )}
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
+                            <i data-lucide="brain" class="text-purple-500 w-10 h-10 mb-4"></i>
+                            <h4 class="font-bold text-slate-400 uppercase text-xs tracking-[0.2em] mb-4">Progreso Unidad</h4>
+                            <div class="relative">
+                                <svg class="w-24 h-24">
+                                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-100" />
+                                    <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" 
+                                            stroke-dasharray="251.2" stroke-dashoffset="${251.2 - progress}" class="text-indigo-600" style="transition: stroke-dashoffset 0.5s ease" />
+                                </svg>
+                                <span class="absolute inset-0 flex items-center justify-center text-2xl font-black text-indigo-900">
+                                    ${unit.id}
+                                </span>
                             </div>
                         </div>
-                    </main>
-                </div>
-            );
-        };
+                    </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+                    <div class="bg-amber-50 rounded-2xl p-6 border border-amber-200 flex gap-5 items-start">
+                        <div class="bg-amber-400 p-3 rounded-xl text-white">
+                            <i data-lucide="help-circle" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-900 text-lg mb-1">Did You Know?</h4>
+                            <p class="text-amber-800 text-lg leading-snug italic">"${topic.didYouKnow}"</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-10 border-t border-slate-200">
+                        <button onclick="handlePrev()" ${activeTopicIndex === 0 ? 'style="visibility:hidden"' : ''}
+                            class="flex items-center gap-2 text-slate-500 font-bold hover:text-indigo-600 transition-colors">
+                            <i data-lucide="chevron-left"></i> Anterior
+                        </button>
+                        <button onclick="handleNext()" 
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all transform hover:-translate-y-1">
+                            ${activeTopicIndex === unit.topics.length - 1 ? "Comenzar Test" : "Siguiente Tema"} <i data-lucide="chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderQuiz() {
+            const unit = units[activeUnitIndex];
+            mainContainer.innerHTML = `
+                <div class="bg-white rounded-[3rem] shadow-2xl p-12 text-center max-w-lg mx-auto border border-slate-100">
+                    <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
+                        <i data-lucide="award" class="w-12 h-12"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-slate-900 mb-2">¡Unidad Completada!</h3>
+                    <p class="text-slate-500 text-lg mb-10">Has dominado los temas de la ${unit.title}</p>
+                    
+                    <div class="bg-slate-50 rounded-3xl p-8 mb-10">
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Tu calificación</p>
+                        <div class="text-7xl font-black text-indigo-600">100<span class="text-3xl">%</span></div>
+                    </div>
+
+                    <button onclick="goToNextUnit()" 
+                        class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold hover:bg-black transition-all shadow-lg text-lg">
+                        Continuar a la siguiente unidad
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function goToNextUnit() {
+            if (activeUnitIndex < units.length - 1) {
+                activeUnitIndex++;
+                activeTopicIndex = 0;
+                renderSidebar();
+                renderContent();
+            } else {
+                alert("¡Felicidades! Has terminado todas las unidades.");
+            }
+        }
+
+        // Ejecutar al cargar
+        window.onload = init;
     </script>
 </body>
 </html>
